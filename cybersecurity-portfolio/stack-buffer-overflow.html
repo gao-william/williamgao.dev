@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Stack-based buffer overflow exploit-development project by William Gao."
+    />
+    <title>Stack-Based Buffer Overflow | William Gao</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body data-project="stack-buffer-overflow">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="Main navigation">
+        <a class="name" href="index.html">William Gao</a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="projects.html">Projects</a>
+          <a href="assets/William-Gao-Resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="https://github.com/gao-william">GitHub</a>
+          <a href="https://www.linkedin.com/in/gao-william">LinkedIn</a>
+          <a href="mailto:williamgao101@gmail.com">Email</a>
+          <button id="theme-toggle" type="button" aria-label="Switch to light mode">Light</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page wrap project-detail" id="content">
+      <header class="page-header project-header">
+        <p class="page-kicker">Exploit-development lab · December 2025</p>
+        <h1>Stack-based buffer overflow to RCE</h1>
+        <p class="page-intro">
+          I traced an unsafe copy into a fixed-size stack buffer, proved control of the saved
+          instruction pointer, and built a working x86 payload that redirected execution into
+          attacker-controlled bytes inside an isolated Windows lab.
+        </p>
+      </header>
+
+      <dl class="project-facts" aria-label="Project facts">
+        <div>
+          <dt>Target</dt>
+          <dd>32-bit Windows FMLServer</dd>
+        </div>
+        <div>
+          <dt>Analysis</dt>
+          <dd>x32dbg and x86 stack layout</dd>
+        </div>
+        <div>
+          <dt>Exploit</dt>
+          <dd>Python TCP payload</dd>
+        </div>
+        <div>
+          <dt>Environment</dt>
+          <dd>Isolated Kali and Windows VMs</dd>
+        </div>
+      </dl>
+
+      <div class="project-layout">
+        <aside class="project-toc" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a href="#scope">Scenario and boundaries</a>
+            <a href="#root-cause">Root cause</a>
+            <a href="#eip">Establishing EIP control</a>
+            <a href="#payload">Payload construction</a>
+            <a href="#result">Result</a>
+            <a href="#mitigation">Mitigation analysis</a>
+            <a href="#skills">Skills demonstrated</a>
+          </nav>
+        </aside>
+
+        <article class="case-study">
+          <section id="scope">
+            <h2>Scenario and boundaries</h2>
+            <p>
+              The target was FMLServer, compiled as a 32-bit Debug build and running on a Windows
+              VM. I analyzed the process with x32dbg while a Kali Linux VM sent test data over TCP
+              port 8421. Python handled payload delivery, and Metasploit tooling generated and
+              received the final lab reverse connection.
+            </p>
+            <p>
+              This was an intentionally vulnerable environment. DEP, ASLR, stack protections,
+              Windows Firewall, and real-time malware protection were disabled or relaxed so the
+              exercise could isolate the mechanics of a classic stack overflow. The technique is
+              not presented as representative of a normally hardened Windows system.
+            </p>
+          </section>
+
+          <section id="root-cause">
+            <h2>Root cause</h2>
+            <p>
+              The vulnerable <span class="command-inline">isASCII()</span> function accepted raw
+              network input and copied it into
+              <span class="command-inline">char cmdToParse[500]</span> with
+              <span class="command-inline">strcpy()</span>. Because
+              <span class="command-inline">strcpy()</span> copies until a null terminator and has
+              no destination-length parameter, input longer than the buffer continued into local
+              variables, the saved base pointer, and the saved return address.
+            </p>
+            <figure class="project-figure narrow-figure">
+              <img
+                src="assets/overflow-vulnerable-function.png"
+                alt="Source code for the vulnerable isASCII function showing a 500-byte stack buffer followed by an unbounded strcpy call"
+              />
+              <figcaption>
+                The validation logic operated only after the unsafe copy. Checking whether bytes
+                were ASCII did not protect the destination buffer from being overwritten first.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="eip">
+            <h2>Establishing control of EIP</h2>
+            <p>
+              I first approximated the stack layout from the 500-byte buffer, two local integers,
+              saved EBP, and saved EIP. I then sent marker-based payloads and observed register
+              state in x32dbg. Seeing marker bytes appear in EIP proved that the network input
+              controlled the saved return address; the final layout placed the replacement
+              address after 512 padding bytes and four additional marker bytes.
+            </p>
+            <p>
+              To redirect execution, I searched the target module for a stable
+              <span class="command-inline">jmp esp</span> instruction. The debugger identified
+              address <span class="command-inline">0x561586B3</span>, encoded in little-endian
+              order inside the Python payload.
+            </p>
+            <figure class="project-figure narrow-figure">
+              <img
+                src="assets/overflow-jmp-esp.png"
+                alt="Debugger result listing a jmp esp instruction at address 0x561586B3"
+              />
+              <figcaption>
+                The selected instruction transferred control from the overwritten return address
+                to the top of the attacker-controlled stack.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="payload">
+            <h2>Payload construction</h2>
+            <p>
+              The final Python script opened a TCP socket to the server and assembled the payload
+              in four parts. I excluded null and newline bytes from the generated x86 payload
+              because either could terminate or disrupt the server’s string-processing path.
+            </p>
+            <div class="table-scroll" tabindex="0" aria-label="Scrollable exploit payload layout">
+              <table class="plain-table compact-table">
+                <thead>
+                  <tr>
+                    <th>Component</th>
+                    <th>Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Padding and markers</td><td>Reach the saved return address at the confirmed offset</td></tr>
+                  <tr><td>JMP ESP address</td><td>Replace EIP and redirect execution to stack-controlled data</td></tr>
+                  <tr><td>32-byte NOP sled</td><td>Provide a tolerant landing region before the generated bytes</td></tr>
+                  <tr><td>x86 reverse payload</td><td>Establish the controlled callback to the Kali handler</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="result">
+            <h2>Result</h2>
+            <p>
+              When the vulnerable function returned, the overwritten address was loaded into EIP.
+              The selected instruction redirected execution to ESP, which advanced through the
+              NOP sled and into the generated bytes. The reported result was a Meterpreter reverse
+              TCP session from the Windows server process to the listener on the Kali VM,
+              demonstrating remote code execution inside the lab.
+            </p>
+          </section>
+
+          <section id="mitigation">
+            <h2>Mitigation analysis</h2>
+            <p>
+              The direct fix is at the source: reject oversized input before copying and replace
+              the unbounded copy with an explicitly bounded operation. Validation must occur
+              before data enters the destination buffer, not after corruption has already happened.
+            </p>
+            <ul class="work-list">
+              <li><strong>Stack cookies (/GS)</strong> detect corruption before the function uses an overwritten return address.</li>
+              <li><strong>DEP</strong> marks the stack non-executable, preventing this payload from running directly from injected stack bytes.</li>
+              <li><strong>ASLR</strong> makes a fixed control-transfer address unreliable between executions.</li>
+              <li><strong>Firewall, endpoint protection, and least exposure</strong> reduce access to the vulnerable service and improve detection.</li>
+            </ul>
+          </section>
+
+          <section id="skills">
+            <h2>Skills demonstrated</h2>
+            <ul class="skill-tags" aria-label="Skills demonstrated by this project">
+              <li>x86 stack analysis</li>
+              <li>Memory corruption</li>
+              <li>x32dbg</li>
+              <li>EIP control</li>
+              <li>Little-endian encoding</li>
+              <li>Python sockets</li>
+              <li>Payload construction</li>
+              <li>Bad-character handling</li>
+              <li>DEP, ASLR, and /GS</li>
+              <li>Secure coding analysis</li>
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <nav class="project-pagination" data-project-pagination aria-label="Other projects"></nav>
+    </main>
+
+  </body>
+</html>

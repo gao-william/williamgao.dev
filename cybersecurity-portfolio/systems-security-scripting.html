@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Python systems administration and security scripting project by William Gao."
+    />
+    <title>Systems &amp; Security Scripting | William Gao</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body data-project="systems-security-scripting">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="Main navigation">
+        <a class="name" href="index.html">William Gao</a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="projects.html">Projects</a>
+          <a href="assets/William-Gao-Resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="https://github.com/gao-william">GitHub</a>
+          <a href="https://www.linkedin.com/in/gao-william">LinkedIn</a>
+          <a href="mailto:williamgao101@gmail.com">Email</a>
+          <button id="theme-toggle" type="button" aria-label="Switch to light mode">Light</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page wrap project-detail" id="content">
+      <header class="page-header project-header">
+        <p class="page-kicker">Python scripting collection · September-November 2025</p>
+        <h1>Systems &amp; security scripting</h1>
+        <p class="page-intro">
+          Four Python command-line utilities that automate recurring Linux administration and
+          security tasks: testing network paths, collecting system state, managing symbolic
+          links, and reducing authentication logs into a short attacker report.
+        </p>
+      </header>
+
+      <dl class="project-facts" aria-label="Project facts">
+        <div>
+          <dt>Language</dt>
+          <dd>Python 3</dd>
+        </div>
+        <div>
+          <dt>Platform</dt>
+          <dd>Linux command line</dd>
+        </div>
+        <div>
+          <dt>Collection</dt>
+          <dd>Four standalone utilities</dd>
+        </div>
+        <div>
+          <dt>Focus</dt>
+          <dd>Diagnostics, automation, log analysis</dd>
+        </div>
+      </dl>
+
+      <div class="project-layout">
+        <aside class="project-toc" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a href="#overview">Collection overview</a>
+            <a href="#ping-test">Network connectivity tester</a>
+            <a href="#system-report">System inventory report</a>
+            <a href="#shortcut">Symbolic-link manager</a>
+            <a href="#attacker-report">Failed-login analyzer</a>
+            <a href="#practices">Shared engineering practices</a>
+            <a href="#improvements">What I would improve</a>
+            <a href="#skills">Skills demonstrated</a>
+          </nav>
+        </aside>
+
+        <article class="case-study">
+          <section id="overview">
+            <h2>Collection overview</h2>
+            <p>
+              These scripts turn manual terminal checks into focused tools with predictable
+              output. They are intentionally small and standalone: each script solves one
+              administration problem, handles expected failure cases, and can be run directly
+              with Python 3 on a Linux host.
+            </p>
+            <div class="table-scroll" tabindex="0" aria-label="Scrollable script summary">
+              <table class="plain-table">
+                <thead>
+                  <tr>
+                    <th>Script</th>
+                    <th>Operational use</th>
+                    <th>Primary implementation skills</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="system-role">ping_test.py</td>
+                    <td>Separate gateway, remote-network, and DNS failures</td>
+                    <td>subprocess, sockets, route parsing, timeouts</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">system_report.py</td>
+                    <td>Capture a repeatable Linux host inventory</td>
+                    <td>system interfaces, regex, CIDR math, file output</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">shortcut.py</td>
+                    <td>Create, remove, and report on symbolic links safely</td>
+                    <td>pathlib, filesystem traversal, validation, type hints</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">attacker_report.py</td>
+                    <td>Identify repeated failed-login sources in a syslog export</td>
+                    <td>regex, Counter, thresholding, optional GeoIP</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="ping-test">
+            <p class="section-kicker">01 / Network diagnostics</p>
+            <h2>Network connectivity tester</h2>
+            <p>
+              <span class="command-inline">ping_test.py</span> provides a menu for checking the
+              default route, local gateway reachability, remote IP reachability, and DNS name
+              resolution. The checks are separated so the result points toward the failed layer
+              instead of returning only a generic “network unavailable” message.
+            </p>
+            <ol class="method-list">
+              <li>
+                <strong>Usage</strong>
+                Diagnose whether a Linux host has a route, can reach its gateway, can reach a
+                remote network, and can resolve and contact a hostname.
+              </li>
+              <li>
+                <strong>Implementation</strong>
+                A reusable <span class="command-inline">run()</span> wrapper executes argument
+                lists with captured output and timeouts. The script parses
+                <span class="command-inline">ip r</span> for the default gateway, calls
+                <span class="command-inline">ping</span> without a shell, and uses
+                <span class="command-inline">socket.gethostbyname()</span> for IPv4 resolution.
+              </li>
+              <li>
+                <strong>Output</strong>
+                Displays the underlying command output and reduces the return code to a clear
+                SUCCESS or FAILED status while still showing the technical evidence.
+              </li>
+            </ol>
+            <ul class="skill-tags" aria-label="Network connectivity tester skills">
+              <li>Linux routing</li>
+              <li>subprocess</li>
+              <li>DNS resolution</li>
+              <li>Socket programming</li>
+              <li>Timeout handling</li>
+            </ul>
+          </section>
+
+          <section id="system-report">
+            <p class="section-kicker">02 / System inventory</p>
+            <h2>Linux system inventory report</h2>
+            <p>
+              <span class="command-inline">system_report.py</span> gathers network, operating
+              system, storage, processor, and memory information into one timestamped report. It
+              is useful for documenting a VM before troubleshooting or recording the state of a
+              host after configuration.
+            </p>
+            <ol class="method-list">
+              <li>
+                <strong>Usage</strong>
+                Produce a concise baseline containing the hostname, domain suffix, IPv4 address,
+                netmask, gateway, DNS servers, OS and kernel, root-disk capacity, CPU data, and RAM.
+              </li>
+              <li>
+                <strong>Implementation</strong>
+                Individual functions read Linux interfaces including
+                <span class="command-inline">/etc/resolv.conf</span>,
+                <span class="command-inline">/etc/os-release</span>, and
+                <span class="command-inline">/proc/cpuinfo</span>, while commands such as
+                <span class="command-inline">ip</span>, <span class="command-inline">df</span>,
+                <span class="command-inline">free</span>, and
+                <span class="command-inline">uname</span> supply runtime data. The
+                <span class="command-inline">prefix_to_mask()</span> function converts a CIDR
+                prefix into dotted-decimal form with bit operations.
+              </li>
+              <li>
+                <strong>Output</strong>
+                Prints a labeled report and writes
+                <span class="command-inline">&lt;hostname&gt;_system_report.log</span> to the
+                user’s home directory, falling back to
+                <span class="command-inline">/tmp</span> if the first write fails.
+              </li>
+            </ol>
+            <ul class="skill-tags" aria-label="System inventory report skills">
+              <li>Linux system interfaces</li>
+              <li>Regular expressions</li>
+              <li>IPv4 subnet masks</li>
+              <li>Data normalization</li>
+              <li>Pathlib</li>
+            </ul>
+          </section>
+
+          <section id="shortcut">
+            <p class="section-kicker">03 / Filesystem automation</p>
+            <h2>Symbolic-link manager</h2>
+            <p>
+              <span class="command-inline">shortcut.py</span> wraps symbolic-link operations in a
+              menu-driven interface. It can create a Desktop link to an existing file, delete a
+              selected Desktop link, and report on links found on the Desktop and throughout the
+              current user’s home directory.
+            </p>
+            <ol class="method-list">
+              <li>
+                <strong>Usage</strong>
+                Manage common symbolic-link tasks without manually constructing
+                <span class="command-inline">ln</span>, <span class="command-inline">find</span>,
+                and <span class="command-inline">unlink</span> commands.
+              </li>
+              <li>
+                <strong>Implementation</strong>
+                The script uses <span class="command-inline">pathlib.Path</span> for path handling,
+                <span class="command-inline">os.symlink()</span> and
+                <span class="command-inline">os.readlink()</span> for link operations, and
+                <span class="command-inline">os.walk(..., followlinks=False)</span> to count links
+                without recursively following them.
+              </li>
+              <li>
+                <strong>Safety controls</strong>
+                It verifies that the target exists, asks before replacing a same-named Desktop
+                item, refuses to overwrite a real directory, lists only symbolic links for
+                deletion, validates numeric menu choices, and handles Ctrl+C cleanly.
+              </li>
+            </ol>
+            <ul class="skill-tags" aria-label="Symbolic-link manager skills">
+              <li>Filesystem automation</li>
+              <li>Symbolic links</li>
+              <li>Path validation</li>
+              <li>Defensive deletion</li>
+              <li>Python type hints</li>
+            </ul>
+          </section>
+
+          <section id="attacker-report">
+            <p class="section-kicker">04 / Security log analysis</p>
+            <h2>Failed-login source analyzer</h2>
+            <p>
+              <span class="command-inline">attacker_report.py</span> reads an exported syslog,
+              extracts IPv4 sources from failed SSH password messages, counts attempts by source,
+              and reports only addresses that meet a ten-attempt review threshold.
+            </p>
+            <ol class="method-list">
+              <li>
+                <strong>Usage</strong>
+                Reduce a long authentication log into a short list of repeat sources that deserve
+                investigation, with the report date and attempt count preserved.
+              </li>
+              <li>
+                <strong>Implementation</strong>
+                A compiled regular expression extracts the address following
+                <span class="command-inline">Failed password ... from</span>.
+                <span class="command-inline">collections.Counter</span> aggregates attempts, a
+                list comprehension applies the threshold, and a deterministic sort orders the
+                output by count and IP.
+              </li>
+              <li>
+                <strong>Enrichment and failure handling</strong>
+                GeoIP lookup is optional: the script enables country information when the module
+                is available and reports Unknown otherwise. It also exits with a clear message
+                when <span class="command-inline">syslog.log</span> is missing.
+              </li>
+            </ol>
+            <ul class="skill-tags" aria-label="Failed-login analyzer skills">
+              <li>Authentication logs</li>
+              <li>Regex parsing</li>
+              <li>Frequency analysis</li>
+              <li>GeoIP enrichment</li>
+              <li>Security reporting</li>
+            </ul>
+          </section>
+
+          <section id="practices">
+            <h2>Shared engineering practices</h2>
+            <ul class="work-list">
+              <li>Split each tool into small functions with a single responsibility.</li>
+              <li>Passed command arguments as lists instead of building shell command strings.</li>
+              <li>Preserved technical evidence while also producing readable success, inventory, or report output.</li>
+              <li>Handled missing commands, files, paths, permissions, DNS responses, and optional packages without uncontrolled tracebacks.</li>
+              <li>Used standard-library modules where possible so the tools remained portable across similar Linux hosts.</li>
+            </ul>
+          </section>
+
+          <section id="improvements">
+            <h2>What I would improve</h2>
+            <p>
+              The scripts work as focused learning tools, but I would make the next version easier
+              to test and reuse. I would replace hard-coded targets, filenames, and thresholds
+              with <span class="command-inline">argparse</span> options; narrow broad exception
+              handlers; add IPv6 and multi-interface support; and produce JSON or CSV alongside
+              terminal output.
+            </p>
+            <p>
+              I would also add automated tests using mocked subprocess results, temporary
+              filesystems, and authentication-log fixtures. For the log analyzer, I would validate
+              addresses with <span class="command-inline">ipaddress</span>, support multiple SSH
+              failure formats, cache GeoIP results, and make the review threshold configurable.
+            </p>
+          </section>
+
+          <section id="skills">
+            <h2>Skills demonstrated</h2>
+            <ul class="skill-tags" aria-label="Skills demonstrated by this project">
+              <li>Python 3</li>
+              <li>Linux administration</li>
+              <li>Network troubleshooting</li>
+              <li>System inventory</li>
+              <li>Filesystem operations</li>
+              <li>Log parsing</li>
+              <li>Regular expressions</li>
+              <li>subprocess</li>
+              <li>socket</li>
+              <li>pathlib</li>
+              <li>Error handling</li>
+              <li>CLI design</li>
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <nav class="project-pagination" data-project-pagination aria-label="Other projects"></nav>
+    </main>
+
+  </body>
+</html>

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Windows domain services and infrastructure automation project by William Gao."
+    />
+    <title>Windows Domain Services &amp; Automation | William Gao</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body data-project="windows-domain-automation">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="Main navigation">
+        <a class="name" href="index.html">William Gao</a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="projects.html">Projects</a>
+          <a href="assets/William-Gao-Resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="https://github.com/gao-william">GitHub</a>
+          <a href="https://www.linkedin.com/in/gao-william">LinkedIn</a>
+          <a href="mailto:williamgao101@gmail.com">Email</a>
+          <button id="theme-toggle" type="button" aria-label="Switch to light mode">Light</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page wrap project-detail" id="content">
+      <header class="page-header project-header">
+        <p class="page-kicker">Infrastructure lab series · September-December 2025</p>
+        <h1>Windows domain services &amp; automation</h1>
+        <p class="page-intro">
+          A connected Windows and Linux environment built to practice the full administration
+          cycle: network bootstrap, centralized identity, policy enforcement, repeatable
+          administration, resilient storage, shared services, and operational monitoring.
+        </p>
+      </header>
+
+      <dl class="project-facts" aria-label="Project facts">
+        <div>
+          <dt>Environment</dt>
+          <dd>Five virtual system roles</dd>
+        </div>
+        <div>
+          <dt>Core services</dt>
+          <dd>AD DS, DNS, DHCP, GPO</dd>
+        </div>
+        <div>
+          <dt>Automation</dt>
+          <dd>PowerShell, Bash, cron, Git</dd>
+        </div>
+        <div>
+          <dt>Platforms</dt>
+          <dd>Windows Server, Windows 11, Rocky Linux</dd>
+        </div>
+      </dl>
+
+      <div class="project-layout">
+        <aside class="project-toc" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a href="#overview">Overview and scope</a>
+            <a href="#environment">Environment built</a>
+            <a href="#domain">Domain services</a>
+            <a href="#automation">Administration and automation</a>
+            <a href="#storage">Storage and file services</a>
+            <a href="#web-logging">Web services and logging</a>
+            <a href="#validation">Validation and troubleshooting</a>
+            <a href="#security">Security judgment</a>
+            <a href="#skills">Skills demonstrated</a>
+          </nav>
+        </aside>
+
+        <article class="case-study">
+          <section id="overview">
+            <h2>Overview and scope</h2>
+            <p>
+              I treated six connected hands-on labs as one infrastructure build instead of six
+              isolated tasks. The environment began with a private virtual network and reusable
+              operating-system templates, then grew into a domain with Windows and Linux members,
+              remote management, storage services, an Apache host, and centralized Linux logging.
+            </p>
+            <p>
+              This was a controlled lab environment, not a production deployment. The value of
+              the project was learning how the services depend on one another and how to verify
+              each change before adding the next layer.
+            </p>
+          </section>
+
+          <section id="environment">
+            <h2>Environment built</h2>
+            <p>
+              VMware Workstation provided the isolated systems. A pfSense VM separated the
+              private LAN from the VMware NAT network, while linked clones made it possible to
+              expand the environment without rebuilding every operating system.
+            </p>
+            <div class="table-scroll" tabindex="0" aria-label="Scrollable environment roles">
+              <table class="plain-table">
+                <thead>
+                  <tr>
+                    <th>System role</th>
+                    <th>Platform</th>
+                    <th>Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="system-role">Gateway</td>
+                    <td>pfSense</td>
+                    <td>WAN-to-LAN routing for the isolated virtual network</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">Domain controller</td>
+                    <td>Windows Server 2025</td>
+                    <td>Active Directory Domain Services, DNS, DHCP, and Group Policy</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">Domain client</td>
+                    <td>Windows 11</td>
+                    <td>Domain sign-in, policy testing, remote administration, and share access</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">Linux client</td>
+                    <td>Rocky Linux</td>
+                    <td>Cross-platform identity, Git, account management, and Cockpit</td>
+                  </tr>
+                  <tr>
+                    <td class="system-role">Service host</td>
+                    <td>Rocky Linux</td>
+                    <td>Storage, SMB/NFS, Apache, scheduled jobs, and centralized logging</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="detail-note">
+              I assigned hostnames and static addressing where required, configured the pfSense
+              LAN gateway, and validated local and external connectivity before installing roles.
+            </p>
+          </section>
+
+          <section id="domain">
+            <h2>Domain services and policy</h2>
+            <p>
+              On Windows Server, I installed AD DS, DNS, DHCP, and Group Policy Management, created
+              a new forest, and promoted the server to a domain controller. I configured and
+              authorized a DHCP scope with exclusions, gateway, DNS server, and domain options so
+              clients received the information required to locate the domain.
+            </p>
+            <ul class="work-list">
+              <li>Created organizational units, users, and groups in Active Directory.</li>
+              <li>Joined Windows 11 to the domain and verified that the client received its configuration from DHCP.</li>
+              <li>Joined Rocky Linux through <span class="command-inline">realmd</span> and <span class="command-inline">adcli</span>, then verified domain discovery and an Active Directory user sign-in.</li>
+              <li>Created and linked Group Policy Objects for user restrictions and desktop configuration.</li>
+              <li>Forced policy refresh with <span class="command-inline">gpupdate</span> and generated HTML evidence with <span class="command-inline">Get-GPReport</span>.</li>
+            </ul>
+          </section>
+
+          <section id="automation">
+            <h2>Administration and automation</h2>
+            <p>
+              I moved repeated administrative work from the GUI into PowerShell and Bash. Using
+              Windows Admin Center and PowerShell remoting, I queried domain state and created or
+              updated directory objects with commands such as
+              <span class="command-inline">New-ADOrganizationalUnit</span>,
+              <span class="command-inline">New-ADUser</span>, and
+              <span class="command-inline">Set-ADUser</span>.
+            </p>
+            <p>
+              On Linux, I managed accounts, groups, services, and firewall rules from the shell,
+              used Cockpit for remote administration, and scheduled recurring work with user
+              crontabs. I also configured Git and GitHub CLI, committed a Python connectivity
+              script, and tracked scripts and configuration evidence instead of leaving changes
+              only on individual VMs.
+            </p>
+          </section>
+
+          <section id="storage">
+            <h2>Storage and file services</h2>
+            <p>
+              The storage portion went beyond creating a filesystem. I built XFS volumes,
+              referenced them by UUID in <span class="command-inline">/etc/fstab</span>, and
+              confirmed that mounts survived a reboot. With LVM, I created physical volumes,
+              volume groups, and logical volumes, then expanded a mounted XFS filesystem with
+              <span class="command-inline">lvextend</span> and
+              <span class="command-inline">xfs_growfs</span>.
+            </p>
+            <ul class="work-list">
+              <li>Created software RAID arrays with <span class="command-inline">mdadm</span>.</li>
+              <li>Simulated a disk failure, verified degraded operation, replaced the member, and monitored the rebuild through <span class="command-inline">/proc/mdstat</span> and <span class="command-inline">mdadm --detail</span>.</li>
+              <li>Used <span class="command-inline">rsync</span> with dry runs, exclusions, deletion control, and logging to make file-copy behavior reviewable before execution.</li>
+              <li>Configured Samba and NFS shares for Windows and Linux clients, including group-based write access, service startup, host firewall rules, and persistent client mounts.</li>
+            </ul>
+          </section>
+
+          <section id="web-logging">
+            <h2>Web services and centralized logging</h2>
+            <p>
+              I deployed Apache on Rocky Linux, hosted multiple name-based virtual sites from one
+              server, and connected them to Windows DNS with A and CNAME records. I generated a
+              private key, certificate signing request, and self-signed certificate with OpenSSL,
+              then configured an HTTPS virtual host for the lab.
+            </p>
+            <p>
+              For observability, I configured one Rocky Linux system as an rsyslog collector and
+              another as a forwarding client. Firewall rules allowed the chosen logging traffic,
+              <span class="command-inline">logger</span> generated test events, and
+              <span class="command-inline">tail -f</span> confirmed that the central server
+              received messages containing the client hostname. A cron job repeated the event on
+              a schedule to validate both automation and log delivery.
+            </p>
+          </section>
+
+          <section id="validation">
+            <h2>Validation and troubleshooting</h2>
+            <p>
+              I used service-specific checks rather than assuming that a successful install meant
+              a working environment. Examples included
+              <span class="command-inline">Get-ADDomain</span>,
+              <span class="command-inline">Get-DhcpServerv4Scope</span>,
+              <span class="command-inline">realm list</span>,
+              <span class="command-inline">nslookup</span>,
+              <span class="command-inline">testparm</span>,
+              <span class="command-inline">smbclient</span>, and systemd service status.
+            </p>
+            <p>
+              When a service failed, I checked the dependency chain in order: addressing and
+              routing, DNS resolution, service state, firewall rules, access permissions, and
+              SELinux context. I also used Wireshark to inspect SMTP and IMAP exchanges in the
+              lab, connecting application behavior to the traffic moving between clients and the
+              server.
+            </p>
+          </section>
+
+          <section id="security">
+            <h2>Security judgment</h2>
+            <p>
+              Some exercises were useful for understanding protocols but should not be copied
+              directly into production. A real deployment should use supported operating systems,
+              CA-issued certificates, encrypted mail protocols, least-privilege access tokens,
+              restrictive NFS export options, and SELinux in enforcing mode. Anonymous or
+              unencrypted legacy services should be removed rather than treated as portfolio
+              strengths.
+            </p>
+            <p>
+              The durable security lessons were centralized identity, group-based authorization,
+              controlled firewall openings, configuration validation, resilient storage,
+              centralized logs, and repeatable administration with version-controlled scripts.
+            </p>
+          </section>
+
+          <section id="skills">
+            <h2>Skills demonstrated</h2>
+            <ul class="skill-tags" aria-label="Skills demonstrated by this project">
+              <li>Active Directory Domain Services</li>
+              <li>DNS and DHCP</li>
+              <li>Group Policy</li>
+              <li>PowerShell remoting</li>
+              <li>Bash administration</li>
+              <li>Windows Admin Center</li>
+              <li>Git and GitHub</li>
+              <li>VMware and pfSense</li>
+              <li>Linux identity integration</li>
+              <li>XFS, LVM, and mdadm</li>
+              <li>Samba and NFS</li>
+              <li>Apache and TLS</li>
+              <li>Rsyslog and cron</li>
+              <li>Wireshark</li>
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <nav class="project-pagination" data-project-pagination aria-label="Other projects"></nav>
+    </main>
+
+  </body>
+</html>
