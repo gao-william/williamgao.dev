@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Cybersecurity projects and technical write-ups by William Gao." />
+    <title>Projects | William Gao</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="Main navigation">
+        <a class="name" href="index.html">William Gao</a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="projects.html">Projects</a>
+          <a href="assets/William-Gao-Resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="https://github.com/gao-william">GitHub</a>
+          <a href="https://www.linkedin.com/in/gao-william">LinkedIn</a>
+          <a href="mailto:williamgao101@gmail.com">Email</a>
+          <button id="theme-toggle" type="button" aria-label="Switch to light mode">Light</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page wrap" id="content">
+      <header class="page-header project-index-header">
+        <p class="page-kicker">Projects</p>
+        <h1>Technical work</h1>
+        <p class="page-intro">
+          Detailed write-ups of security assessments, labs, and technical projects. Each project
+          write-up includes the environment, tools, process, key findings, and skills demonstrated.
+        </p>
+      </header>
+
+      <section class="project-list" aria-label="Project list">
+        <article class="project-preview">
+          <div class="project-preview-label">
+            <p>Malware analysis</p>
+            <span class="project-date">April 2026</span>
+          </div>
+          <div class="project-preview-content">
+            <h2>SystemBC malware analysis</h2>
+            <p>
+              Analyzed a SystemBC sample across static tools, controlled execution, disassembly,
+              and live debugging. The investigation traced persistence-related code, scheduled-task
+              artifacts, and randomly named executables written beneath ProgramData.
+            </p>
+            <ul class="project-preview-meta" aria-label="Project technologies">
+              <li>IDA</li>
+              <li>x32dbg</li>
+              <li>Process Monitor</li>
+              <li>Malware analysis</li>
+            </ul>
+            <a class="project-link" href="systembc-malware-analysis.html">Explore more →</a>
+          </div>
+        </article>
+
+        <article class="project-preview">
+          <div class="project-preview-label">
+            <p>Exploit development</p>
+            <span class="project-date">Dec 2025</span>
+          </div>
+          <div class="project-preview-content">
+            <h2>Stack-based buffer overflow to RCE</h2>
+            <p>
+              Analyzed an unsafe string copy in a 32-bit Windows server, established control of
+              EIP, identified a reliable control-flow redirection instruction, and constructed a
+              Python payload that demonstrated remote code execution in an isolated lab.
+            </p>
+            <ul class="project-preview-meta" aria-label="Project technologies">
+              <li>x32dbg</li>
+              <li>Python</li>
+              <li>x86 stack analysis</li>
+              <li>Exploit mitigations</li>
+            </ul>
+            <a class="project-link" href="stack-buffer-overflow.html">Explore more →</a>
+          </div>
+        </article>
+
+        <article class="project-preview">
+          <div class="project-preview-label">
+            <p>Secure data structures</p>
+            <span class="project-date">Sep 2025 - Dec 2025</span>
+          </div>
+          <div class="project-preview-content">
+            <h2>File metadata ledger CLI</h2>
+            <p>
+              Built a C command parser that records valid operations in an in-memory linked
+              ledger, chains each entry to the preceding hash, detects simulated tampering,
+              loads its hashing functions from a Windows DLL, and serves the interface over TCP.
+            </p>
+            <ul class="project-preview-meta" aria-label="Project technologies">
+              <li>C</li>
+              <li>Linked lists</li>
+              <li>Hash chaining</li>
+              <li>Winsock</li>
+            </ul>
+            <a class="project-link" href="file-metadata-ledger.html">Explore more →</a>
+          </div>
+        </article>
+
+        <article class="project-preview">
+          <div class="project-preview-label">
+            <p>Infrastructure and automation</p>
+            <span class="project-date">Sep 2025 - Dec 2025</span>
+          </div>
+          <div class="project-preview-content">
+            <h2>Windows domain services &amp; automation</h2>
+            <p>
+              Built and administered a small Windows/Linux enterprise environment across a
+              connected six-lab series. The work covered Active Directory, DNS, DHCP, Group
+              Policy, PowerShell and Bash automation, Linux storage, file services, web hosting,
+              and centralized logging.
+            </p>
+            <ul class="project-preview-meta" aria-label="Project technologies">
+              <li>Active Directory</li>
+              <li>PowerShell</li>
+              <li>Windows Server</li>
+              <li>Rocky Linux</li>
+            </ul>
+            <a class="project-link" href="windows-domain-automation.html">Explore more →</a>
+          </div>
+        </article>
+
+        <article class="project-preview">
+          <div class="project-preview-label">
+            <p>Python systems scripting</p>
+            <span class="project-date">Sep 2025 - Nov 2025</span>
+          </div>
+          <div class="project-preview-content">
+            <h2>Systems &amp; security scripting</h2>
+            <p>
+              Built four Linux-focused Python utilities for network diagnostics, system
+              inventory, symbolic-link management, and failed-login analysis. Each script turns
+              a recurring administration or security task into a repeatable command-line tool.
+            </p>
+            <ul class="project-preview-meta" aria-label="Project technologies">
+              <li>Python</li>
+              <li>Linux</li>
+              <li>Network diagnostics</li>
+              <li>Log analysis</li>
+            </ul>
+            <a class="project-link" href="systems-security-scripting.html">Explore more →</a>
+          </div>
+        </article>
+
+        <article class="project-preview">
+          <div class="project-preview-label">
+            <p>Vulnerability assessment</p>
+            <span class="project-date">Oct 2024 - Dec 2024</span>
+          </div>
+          <div class="project-preview-content">
+            <h2>Brick Wall Cyber</h2>
+            <p>
+              Assessed a simulated managed security provider from its asset inventory and network
+              diagram. The work covered STRIDE threat modeling, CVSS interpretation, business-risk
+              analysis, vulnerability research, and remediation prioritization.
+            </p>
+            <ul class="project-preview-meta" aria-label="Project methods">
+              <li>STRIDE</li>
+              <li>CVSS</li>
+              <li>NIST NVD</li>
+              <li>Risk assessment</li>
+            </ul>
+            <a class="project-link" href="vulnerability-assessment.html">Explore more →</a>
+          </div>
+        </article>
+      </section>
+    </main>
+
+  </body>
+</html>

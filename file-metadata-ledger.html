@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="File metadata ledger CLI and tamper-evident history project by William Gao."
+    />
+    <title>File Metadata Ledger CLI | William Gao</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body data-project="file-metadata-ledger">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="Main navigation">
+        <a class="name" href="index.html">William Gao</a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="projects.html">Projects</a>
+          <a href="assets/William-Gao-Resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="https://github.com/gao-william">GitHub</a>
+          <a href="https://www.linkedin.com/in/gao-william">LinkedIn</a>
+          <a href="mailto:williamgao101@gmail.com">Email</a>
+          <button id="theme-toggle" type="button" aria-label="Switch to light mode">Light</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page wrap project-detail" id="content">
+      <header class="page-header project-header">
+        <p class="page-kicker">C security project · September-December 2025</p>
+        <h1>File metadata ledger CLI &amp; tamper-evident history</h1>
+        <p class="page-intro">
+          I developed a case-sensitive command parser into an in-memory audit ledger that chains
+          every valid command to the entry before it, detects altered history, separates hashing
+          into a runtime-loaded DLL, and exposes the parser through a Windows TCP server.
+        </p>
+      </header>
+
+      <dl class="project-facts" aria-label="Project facts">
+        <div>
+          <dt>Language</dt>
+          <dd>C on Windows</dd>
+        </div>
+        <div>
+          <dt>Data model</dt>
+          <dd>Heap-backed linked list</dd>
+        </div>
+        <div>
+          <dt>Integrity</dt>
+          <dd>Eight-byte chained hash</dd>
+        </div>
+        <div>
+          <dt>Extension</dt>
+          <dd>DLL and Winsock TCP server</dd>
+        </div>
+      </dl>
+
+      <div class="project-layout">
+        <aside class="project-toc" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a href="#overview">Project overview</a>
+            <a href="#parser">Parser and validation</a>
+            <a href="#history">Valid-command history</a>
+            <a href="#integrity">Chained integrity</a>
+            <a href="#tamper-testing">Tamper testing</a>
+            <a href="#dll">Runtime hash DLL</a>
+            <a href="#tcp">TCP service extension</a>
+            <a href="#assessment">Security assessment</a>
+            <a href="#skills">Skills demonstrated</a>
+          </nav>
+        </aside>
+
+        <article class="case-study">
+          <section id="overview">
+            <h2>Project overview</h2>
+            <p>
+              The project grew through functional milestones rather than a single rewrite. I kept
+              the same FML command grammar while adding state, integrity verification, modular
+              hashing, and network access. That progression let me test each new responsibility
+              against behavior that already worked.
+            </p>
+            <p>
+              The final repository contains the C parser/server, the hash DLL project, and the
+              Python test clients used during the later exploit-development work.
+              <a href="https://github.com/gao-william/csec201-fml-parser/blob/main/FMLParser/fml_parser.c">View the final parser source on GitHub →</a>
+            </p>
+          </section>
+
+          <section id="parser">
+            <p class="section-kicker">Parser working</p>
+            <h2>Case-sensitive command validation</h2>
+            <p>
+              I started with a console parser that read one line at a time, split it into tokens,
+              and compared the first token against an allowlist of exact, case-sensitive FML
+              commands. Each command had its own argument-count and option checks, so malformed
+              input received a targeted usage error rather than being treated as valid data.
+            </p>
+            <p>
+              The supported grammar covered upload, download, delete, change, show, history,
+              validate, and quit operations. For commands with subcommands, the parser also
+              checked values such as local versus remote and path versus files or folders. I used
+              <span class="command-inline">strtok_s</span> in the original Visual Studio console
+              version after the compiler flagged the standard tokenizer as unsafe.
+            </p>
+            <figure class="project-figure">
+              <img
+                src="assets/ledger-parser-validation.png"
+                alt="FML parser console showing accepted commands and specific errors for invalid argument counts and options"
+              />
+              <figcaption>
+                The parser accepted correctly formed commands while rejecting missing arguments,
+                unknown commands, and invalid subcommand values.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="history">
+            <p class="section-kicker">Valid commands recorded</p>
+            <h2>Heap-backed command history</h2>
+            <p>
+              I added a singly linked list whose nodes stored heap-allocated copies of successfully
+              parsed commands. Invalid syntax never entered the history. The
+              <span class="command-inline">history</span> command first printed the existing list,
+              then appended itself, so the current invocation did not appear retroactively in its
+              own output.
+            </p>
+            <p>
+              Allocation failures were checked at both the command-copy and node stages. On exit,
+              <span class="command-inline">history_free()</span> walked the list, freed each command
+              string and node, and reset the head pointer instead of abandoning heap memory.
+            </p>
+            <figure class="project-figure narrow-figure">
+              <img
+                src="assets/ledger-history-validation.png"
+                alt="FML parser console showing syntax errors excluded from history while two valid commands are recorded"
+              />
+              <figcaption>
+                The history output contains only the valid <span class="command-inline">show</span>
+                and <span class="command-inline">upload</span> commands; rejected inputs were not recorded.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="integrity">
+            <p class="section-kicker">History made tamper-evident</p>
+            <h2>Chained command hashes</h2>
+            <p>
+              Each node was extended with an eight-byte hash. The first node used a fixed
+              initialization vector; every later node mixed its command text with the previous
+              node’s stored hash. As a result, changing an earlier command also changed the hash
+              expected by every surviving entry after it.
+            </p>
+            <div class="table-scroll" tabindex="0" aria-label="Scrollable linked ledger data flow">
+              <table class="plain-table compact-table">
+                <thead>
+                  <tr>
+                    <th>Element</th>
+                    <th>Role in the ledger</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Command copy</td><td>Preserves the exact valid input associated with the node</td></tr>
+                  <tr><td>Previous hash or IV</td><td>Links the current entry to the state before it</td></tr>
+                  <tr><td>Eight-byte output</td><td>Stores the expected integrity value for later recomputation</td></tr>
+                  <tr><td>Next pointer</td><td>Maintains ordered traversal through the in-memory history</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="detail-note">
+              The custom rotate/XOR/add mixing function demonstrates hash chaining, but an
+              eight-byte educational hash is not a replacement for a reviewed cryptographic hash
+              or message-authentication code.
+            </p>
+            <figure class="project-figure narrow-figure">
+              <img
+                src="assets/ledger-chain-validation.png"
+                alt="FML parser console showing two valid commands in history followed by a successful integrity validation"
+              />
+              <figcaption>
+                After two commands were chained into history, recomputation completed with
+                “OK: no alterations detected.”
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="tamper-testing">
+            <p class="section-kicker">Integrity failures located</p>
+            <h2>Validation and tamper simulation</h2>
+            <p>
+              Validation starts from the same IV and recomputes the expected hash for every node in
+              order. It stops at the first mismatch and reports that node’s index; a clean pass
+              returns “no alterations detected.” History display also runs validation before the
+              history command is appended.
+            </p>
+            <p>
+              I added controlled test helpers to delete a node, replace stored command text, or
+              flip a byte in a stored hash. These helpers intentionally bypass normal parser
+              behavior so I could verify that the validator detected changes rather than merely
+              assuming the chain was correct.
+            </p>
+            <figure class="project-figure">
+              <img
+                src="assets/ledger-tamper-validation.png"
+                alt="FML parser console showing validation failures after a node deletion, command changes, and a stored hash modification"
+              />
+              <figcaption>
+                Controlled deletion, command replacement, and hash-byte modification each caused
+                validation to fail and report the first affected node.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="dll">
+            <p class="section-kicker">Hashing separated from the parser</p>
+            <h2>Runtime-loaded Windows DLL</h2>
+            <p>
+              I moved the IV and hash implementation into
+              <span class="command-inline">fmlhash.dll</span> and exported
+              <span class="command-inline">fml_iv8</span> and
+              <span class="command-inline">fml_hash8</span>. The parser loads the library with
+              <span class="command-inline">LoadLibraryW()</span>, resolves decorated and plain
+              export names with <span class="command-inline">GetProcAddress()</span>, and calls
+              the functions through typed pointers.
+            </p>
+            <p>
+              Startup fails cleanly if the DLL or either export is missing, and
+              <span class="command-inline">FreeLibrary()</span> releases the module during normal
+              shutdown or initialization failure.
+            </p>
+            <figure class="project-figure">
+              <img
+                src="assets/ledger-dll-validation.png"
+                alt="FML parser console confirming the hash DLL and both exported functions loaded before history validation succeeded"
+              />
+              <figcaption>
+                Runtime output confirmed that the DLL loaded, both function pointers resolved,
+                commands entered history, and validation succeeded.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="tcp">
+            <p class="section-kicker">Parser exposed as a service</p>
+            <h2>Single-client Winsock server</h2>
+            <p>
+              I converted the console interface into a TCP service with Winsock 2.2. The program
+              creates a stream socket, binds to port 4444, listens, accepts one client, and uses
+              <span class="command-inline">recv()</span> and
+              <span class="command-inline">send()</span> for the prompt, command input, parser
+              results, history, and errors. Valid network commands follow the same parser and
+              ledger path as local commands.
+            </p>
+            <p>
+              The service extension deliberately placed an unbounded copy into a 64-byte stack
+              buffer inside <span class="command-inline">check()</span>. That was an intentional
+              lab vulnerability used to connect secure-coding lessons with later memory-corruption
+              analysis; it is not safe server implementation.
+            </p>
+            <figure class="project-figure">
+              <img
+                src="assets/ledger-tcp-server.png"
+                alt="Windows FML server and Kali client consoles exchanging validated commands over TCP port 4444"
+              />
+              <figcaption>
+                The Windows server logged received input while the Kali client received parser
+                errors, accepted-command responses, history output, and validation results.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="assessment">
+            <h2>Security assessment</h2>
+            <p>
+              The design demonstrates ordered audit data and tamper detection, but it is not a
+              production audit system. The ledger exists only in process memory, the custom hash is
+              not collision-resistant, and there is no external trust anchor. In particular, a
+              validator cannot prove that the final node was never removed unless a trusted count,
+              checkpoint, or signed head value exists outside the list.
+            </p>
+            <p>
+              A hardened version would remove the intentional overflow and test commands, use
+              authenticated clients and encrypted transport, store the append-only history
+              durably, include sequence numbers and timestamps, and protect each entry with
+              HMAC-SHA-256 or signed checkpoints. Those changes would turn the educational chain
+              into a stronger tamper-evident audit design.
+            </p>
+          </section>
+
+          <section id="skills">
+            <h2>Skills demonstrated</h2>
+            <ul class="skill-tags" aria-label="Skills demonstrated by this project">
+              <li>C programming</li>
+              <li>Command parsing</li>
+              <li>Input validation</li>
+              <li>Linked lists</li>
+              <li>Dynamic memory</li>
+              <li>Hash chaining</li>
+              <li>Integrity validation</li>
+              <li>DLL exports</li>
+              <li>Runtime linking</li>
+              <li>Function pointers</li>
+              <li>Winsock</li>
+              <li>Secure coding review</li>
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <nav class="project-pagination" data-project-pagination aria-label="Other projects"></nav>
+    </main>
+
+  </body>
+</html>
