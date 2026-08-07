@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>William Gao</title>
+  <rect width="64" height="64" rx="12" fill="#101312" />
+  <path
+    d="M12 17l7 30 13-23 13 23 7-30"
+    fill="none"
+    stroke="#e8eeeb"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <rect x="43" y="52" width="11" height="3" rx="1.5" fill="#8fe3a7" />
+</svg>
