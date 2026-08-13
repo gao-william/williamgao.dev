@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Detection engineering and incident response homelab built by William Gao with VMware, pfSense, Active Directory, Sysmon, and Wazuh."
+    />
+    <title>Detection Engineering Homelab | William Gao</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body data-project="detection-engineering-ir-homelab">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="Main navigation">
+        <a class="name" href="index.html">William Gao</a>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a aria-current="page" href="projects.html">Projects</a>
+          <a href="assets/William-Gao-Resume.pdf" target="_blank" rel="noopener">Resume</a>
+          <a href="https://github.com/gao-william">GitHub</a>
+          <a href="https://www.linkedin.com/in/gao-william">LinkedIn</a>
+          <a href="mailto:williamgao101@gmail.com">Email</a>
+          <button id="theme-toggle" type="button" aria-label="Switch to light mode">Light</button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page wrap project-detail" id="content">
+      <header class="page-header project-header">
+        <p class="page-kicker">Detection engineering &middot; Aug 2026 - Present</p>
+        <h1>Detection engineering &amp; incident response homelab</h1>
+        <p class="page-intro">
+          I built an isolated enterprise-style environment to generate, collect, and investigate
+          Windows endpoint telemetry. The project connects segmented networking, Active Directory,
+          Group Policy, Sysmon, and Wazuh into one validated detection pipeline.
+        </p>
+      </header>
+
+      <dl class="project-facts" aria-label="Project facts">
+        <div>
+          <dt>Topology</dt>
+          <dd>pfSense, DC01, SIEM01, and WIN11-01</dd>
+        </div>
+        <div>
+          <dt>Monitored LAN</dt>
+          <dd>Isolated 10.10.10.0/24 network</dd>
+        </div>
+        <div>
+          <dt>Identity</dt>
+          <dd>Windows Server 2025 AD DS and DNS</dd>
+        </div>
+        <div>
+          <dt>Detection path</dt>
+          <dd>Sysmon to Wazuh archives and Indexer</dd>
+        </div>
+      </dl>
+
+      <section class="build-sequence" id="sequence" aria-labelledby="sequence-title">
+        <h2 id="sequence-title">Build sequence</h2>
+        <ol>
+          <li>
+            <span class="build-step">01</span>
+            <p><a href="#architecture">Designed and isolated the network</a> — Created the VMware segments, addressing plan, and pfSense boundary.</p>
+          </li>
+          <li>
+            <span class="build-step">02</span>
+            <p><a href="#identity">Built identity and DNS services</a> — Deployed the domain controller, AD-integrated DNS, OUs, users, and groups.</p>
+          </li>
+          <li>
+            <span class="build-step">03</span>
+            <p><a href="#endpoint">Joined and secured the endpoint</a> — Applied Group Policy, administrator controls, and Windows audit policy.</p>
+          </li>
+          <li>
+            <span class="build-step">04</span>
+            <p><a href="#telemetry">Instrumented the endpoint</a> — Added Sysmon and validated process, PowerShell, file, DNS, and network telemetry.</p>
+          </li>
+          <li>
+            <span class="build-step">05</span>
+            <p><a href="#siem">Deployed the SIEM infrastructure</a> — Installed Wazuh and enrolled WIN11-01 as an active agent.</p>
+          </li>
+          <li>
+            <span class="build-step">06</span>
+            <p><a href="#ingestion">Configured and troubleshot ingestion</a> — Connected Wazuh archives, Filebeat, the Indexer, and the searchable data view.</p>
+          </li>
+          <li>
+            <span class="build-step">07</span>
+            <p><a href="#validation">Validated the complete pipeline</a> — Followed a controlled file event from PowerShell to a centralized SIEM record.</p>
+          </li>
+          <li class="planned-step">
+            <span class="build-step">08</span>
+            <p><a href="#next-phase">Run adversary and response exercises</a> <em>Planned</em> — Add ATTACKNET, controlled techniques, detection rules, and incident triage.</p>
+          </li>
+        </ol>
+      </section>
+
+      <div class="project-layout">
+        <aside class="project-toc" aria-label="On this page">
+          <p>On this page</p>
+          <nav>
+            <a href="#sequence">Build sequence</a>
+            <a href="#architecture">Architecture and scope</a>
+            <a href="#identity">Identity and DNS</a>
+            <a href="#endpoint">Endpoint controls</a>
+            <a href="#telemetry">Telemetry engineering</a>
+            <a href="#siem">SIEM deployment</a>
+            <a href="#ingestion">Ingestion troubleshooting</a>
+            <a href="#validation">End-to-end validation</a>
+            <a href="#decisions">Engineering decisions</a>
+            <a href="#next-phase">Next phase</a>
+            <a href="#skills">Skills demonstrated</a>
+          </nav>
+        </aside>
+
+        <article class="case-study">
+          <section id="architecture">
+            <h2>Architecture and scope</h2>
+            <figure class="project-figure">
+              <img
+                src="assets/homelab-network-topology.svg"
+                alt="Network topology showing the current LABNET systems and a dashed planned ATTACKNET segment"
+              />
+              <figcaption>
+                Current lab components are solid. The dashed ATTACKNET branch is a planned expansion
+                and is not presented as completed work.
+              </figcaption>
+            </figure>
+            <p>
+              I created the lab in VMware Workstation and placed its systems behind a dedicated
+              pfSense firewall. The firewall connects VMware NAT on its WAN side to the isolated
+              <span class="command-inline">LABNET</span> on its LAN side. The monitored network uses
+              <span class="command-inline">10.10.10.0/24</span>, with pfSense at
+              <span class="command-inline">10.10.10.1</span>, DC01 at
+              <span class="command-inline">10.10.10.10</span>, SIEM01 at
+              <span class="command-inline">10.10.10.30</span>, and WIN11-01 at
+              <span class="command-inline">10.10.10.101</span>.
+            </p>
+            <p>
+              The design reserves pfSense OPT1 and <span class="command-inline">10.10.30.0/24</span>
+              for a future isolated attack segment. Static addressing on the completed core systems
+              made DNS, directory services, and log collection predictable during testing.
+            </p>
+          </section>
+
+          <section id="identity">
+            <h2>Identity and DNS</h2>
+            <p>
+              DC01 runs Windows Server 2025 as the first domain controller for
+              <span class="command-inline">lab.williamgao.dev</span>. I installed AD DS and
+              AD-integrated DNS, configured DNS forwarding through pfSense, and organized the
+              directory into OUs for users, workstations, servers, service accounts, and security
+              groups. WIN11-01 was joined to the domain and placed in the Workstation OU.
+            </p>
+            <p>
+              I verified the environment instead of stopping at a successful installation screen.
+              The checks confirmed SYSVOL and NETLOGON shares, the domain controller's LDAP SRV
+              record, and successful DCDiag tests for advertising, SYSVOL, NetLogons, and DNS.
+            </p>
+            <figure class="project-figure narrow-figure">
+              <img
+                src="assets/homelab-ad-dns-validation.png"
+                alt="PowerShell validation of SYSVOL, NETLOGON, LDAP SRV records, and DCDiag advertising"
+              />
+              <figcaption>
+                Service-level validation confirmed that the domain controller was publishing and
+                serving the records and shares required for normal domain operation.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="endpoint">
+            <h2>Endpoint controls</h2>
+            <p>
+              I used Group Policy to apply security settings to WIN11-01. A workstation security
+              group was added to the endpoint's local Administrators group, and advanced audit
+              policy captured successful process creation plus successful and failed logons.
+              PowerShell script-block logging was enabled so executed script content would be
+              available for investigation.
+            </p>
+            <p>
+              I validated the resulting telemetry locally: Windows Security Event ID 4688 exposed
+              process lineage and command-line context, while PowerShell Event ID 4104 recorded
+              script blocks. This established a useful baseline before forwarding data to the SIEM.
+            </p>
+            <figure class="project-figure narrow-figure">
+              <img
+                src="assets/homelab-audit-policy-validation.png"
+                alt="PowerShell showing process creation and logon auditing plus enabled PowerShell script-block logging"
+              />
+              <figcaption>
+                Endpoint verification showed process, logon, and PowerShell auditing applied as intended.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="telemetry">
+            <h2>Telemetry engineering</h2>
+            <p>
+              I installed Sysmon on WIN11-01 with a custom configuration and tested the event types
+              most useful to early investigations. The endpoint produced Event ID 11 for file
+              creation, Event ID 22 for DNS queries, and Event ID 3 for network connections. These
+              records retained the initiating process, user, target path or destination, and
+              timestamp needed to reconstruct activity.
+            </p>
+            <p>
+              The combination of native Windows auditing and Sysmon provides complementary views:
+              Windows events preserve authentication and process lineage, while Sysmon adds richer
+              file, DNS, and network detail for detection and event investigation.
+            </p>
+          </section>
+
+          <section id="siem">
+            <h2>SIEM deployment</h2>
+            <p>
+              SIEM01 runs Ubuntu 24.04 LTS with Wazuh 4.14.7. I deployed the Wazuh manager,
+              Indexer, and Dashboard, confirmed the dashboard's API connection, and enrolled
+              WIN11-01 as an active Windows agent.
+            </p>
+            <figure class="project-figure">
+              <img
+                src="assets/homelab-wazuh-agent.png"
+                alt="Wazuh dashboard showing WIN11-01 enrolled as an active Windows agent"
+              />
+              <figcaption>
+                Wazuh reported WIN11-01 as an active agent at 10.10.10.101, confirming endpoint-to-manager connectivity.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="ingestion">
+            <h2>Ingestion troubleshooting</h2>
+            <p>
+              Agent enrollment confirmed connectivity, but it did not guarantee that every raw
+              Sysmon event would be searchable. When a locally generated event was not visible in
+              the dashboard, I traced the collection path one handoff at a time instead of treating
+              the active-agent status as proof of complete ingestion.
+            </p>
+            <p>
+              I enabled Wazuh's JSON event archives, configured Filebeat to collect the archive,
+              and used the <span class="command-inline">wazuh-archives-*</span> data view in the
+              Indexer. This made raw endpoint events queryable even when they did not trigger a
+              predefined Wazuh alert.
+            </p>
+          </section>
+
+          <section id="validation">
+            <h2>End-to-end validation</h2>
+            <p>
+              To test the complete pipeline, I created
+              <span class="command-inline">wazuh-forwarding-proof.txt</span> from PowerShell on
+              WIN11-01. Sysmon recorded the action locally as Event ID 11. I then queried the Wazuh
+              archive and found the same event with its agent, manager, user, initiating process,
+              target path, and event timestamp preserved.
+            </p>
+            <p>
+              This controlled test demonstrated more than agent enrollment: it proved that a real
+              endpoint action traveled through Sysmon, the Wazuh agent, the manager's raw archives,
+              Filebeat, and the Indexer before becoming searchable in the dashboard.
+            </p>
+            <figure class="project-figure">
+              <img
+                src="assets/homelab-centralized-sysmon-event.png"
+                alt="Wazuh Discover result showing the centralized Sysmon file creation event for wazuh-forwarding-proof.txt"
+              />
+              <figcaption>
+                A targeted DQL search returned the controlled file-creation event and its investigation fields in Wazuh.
+              </figcaption>
+            </figure>
+          </section>
+
+          <section id="decisions">
+            <h2>Engineering decisions</h2>
+            <ul class="work-list">
+              <li><strong>Isolation:</strong> routed the lab through pfSense instead of placing test systems directly on the physical network.</li>
+              <li><strong>Stable dependencies:</strong> assigned static addresses to the firewall, domain controller, and SIEM so identity and collection services remained predictable.</li>
+              <li><strong>Layered telemetry:</strong> combined native auditing with Sysmon instead of relying on a single event source.</li>
+              <li><strong>Verifiable outcomes:</strong> tested directory health and followed one controlled endpoint event through every stage of the collection pipeline.</li>
+            </ul>
+          </section>
+
+          <section id="next-phase">
+            <h2>Next phase (planned)</h2>
+            <p>
+              The next stage is to connect the isolated
+              <span class="command-inline">10.10.30.0/24</span> ATTACKNET through pfSense OPT1,
+              deploy a Kali Linux system, and run controlled adversary techniques against the lab.
+              I will then create and tune detections, map activity to MITRE ATT&amp;CK, investigate
+              the resulting alerts, and document triage and containment decisions. These items are
+              shown as planned and are not counted as completed skills yet.
+            </p>
+          </section>
+
+          <section id="skills">
+            <h2>Skills demonstrated</h2>
+            <ul class="skill-tags" aria-label="Skills demonstrated by this project">
+              <li>Detection engineering</li>
+              <li>Wazuh SIEM/XDR</li>
+              <li>Wazuh Indexer</li>
+              <li>OpenSearch Dashboards</li>
+              <li>DQL</li>
+              <li>Filebeat</li>
+              <li>Sysmon</li>
+              <li>Windows event logging</li>
+              <li>Active Directory</li>
+              <li>Group Policy</li>
+              <li>DNS</li>
+              <li>pfSense</li>
+              <li>VMware Workstation</li>
+              <li>Windows Server 2025</li>
+              <li>Ubuntu Linux</li>
+              <li>Log analysis</li>
+              <li>Event investigation</li>
+              <li>Log pipeline troubleshooting</li>
+              <li>Service validation</li>
+              <li>Telemetry validation</li>
+            </ul>
+          </section>
+        </article>
+      </div>
+
+      <nav class="project-pagination" data-project-pagination aria-label="Other projects"></nav>
+    </main>
+  </body>
+</html>

@@ -353,6 +353,73 @@ p {
   font-size: 0.88rem;
 }
 
+.build-sequence {
+  margin: 0 0 56px;
+  scroll-margin-top: 88px;
+}
+
+.project-facts + .build-sequence {
+  margin-top: -24px;
+}
+
+.build-sequence h2 {
+  margin-bottom: 18px;
+}
+
+.build-sequence ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block: 1px solid var(--line);
+}
+
+.build-sequence li {
+  display: grid;
+  padding-block: 12px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.build-sequence li + li {
+  border-top: 1px solid var(--line);
+}
+
+.build-step {
+  color: var(--accent);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.72rem;
+}
+
+.build-sequence p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.build-sequence a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.build-sequence a:hover {
+  color: var(--accent);
+}
+
+.build-sequence em {
+  margin-left: 5px;
+  color: var(--faint);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.68rem;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+.build-sequence .planned-step {
+  border-top-style: dashed;
+}
+
 .case-study {
   min-width: 0;
   max-width: 920px;

@@ -6,6 +6,7 @@ The shared top navigation links to Home, Projects, William's resume, GitHub, Lin
 
 ## Pages
 
+- `detection-engineering-ir-homelab.html` — segmented detection engineering and incident response homelab
 - `index.html` — introduction, background, education, technical focus, and profile links
 - `projects.html` — project index with short previews
 - `vulnerability-assessment.html` — full Brick Wall Cyber case study
@@ -18,7 +19,7 @@ The shared top navigation links to Home, Projects, William's resume, GitHub, Lin
 
 ## Project content
 
-The Projects page currently links to six detailed case studies: the Brick Wall Cyber vulnerability assessment, a six-lab Windows/Linux infrastructure build, a four-script Python systems and security collection, a stack-based buffer overflow exploit-development project, a C-based file metadata ledger, and a SystemBC malware analysis. Each project has its own section navigation and automatic previous/next project links.
+The Projects page currently links to seven detailed write-ups, led by a detection engineering and incident response homelab. Each project has its own section navigation and automatic previous/next project links.
 
 Profile details are populated from William's current resume, including education, expected
 graduation, email, GitHub, LinkedIn, technical areas, and career focus.

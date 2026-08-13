@@ -27,6 +27,11 @@ themeToggle.addEventListener("click", () => {
 // previous/next link on neighboring project pages without showing dead buttons.
 const projectPages = [
   {
+    slug: "detection-engineering-ir-homelab",
+    title: "Detection engineering homelab",
+    href: "detection-engineering-ir-homelab.html",
+  },
+  {
     slug: "systembc-malware-analysis",
     title: "SystemBC malware analysis",
     href: "systembc-malware-analysis.html",
